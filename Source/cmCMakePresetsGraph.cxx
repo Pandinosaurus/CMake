@@ -1142,12 +1142,13 @@ std::string cmCMakePresetsGraph::GetUserFilename(std::string const& sourceDir)
 }
 
 bool cmCMakePresetsGraph::ReadProjectPresets(std::string const& sourceDir,
+                                             std::string const& presetsFile,
                                              ReadOption readFilesOption)
 {
   this->SourceDir = cmSystemTools::CollapseFullPath(sourceDir);
   this->ClearPresets();
 
-  if (!this->ReadProjectPresetsInternal(readFilesOption)) {
+  if (!this->ReadProjectPresetsInternal(presetsFile, readFilesOption)) {
     this->ClearPresets();
     return false;
   }
@@ -1184,27 +1185,39 @@ std::string cmCMakePresetsGraph::GetGeneratorForPreset(
 }
 
 bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
-  ReadOption readFilesOption)
+  std::string const& presetsFile, ReadOption readFilesOption)
 {
   bool haveOneFile = false;
 
   File* file;
-  std::string filename = GetUserFilename(this->SourceDir);
+  std::string filename;
   std::vector<File*> inProgressFiles;
-  if (cmSystemTools::FileExists(filename)) {
-    if (!this->ReadJSONFile(filename, RootType::User, ReadReason::Root,
-                            inProgressFiles, file, this->errors)) {
-      return false;
-    }
-    haveOneFile = true;
-  } else {
-    filename = GetFilename(this->SourceDir);
+  if (!presetsFile.empty()) {
+    filename = presetsFile;
     if (cmSystemTools::FileExists(filename)) {
-      if (!this->ReadJSONFile(filename, RootType::Project, ReadReason::Root,
+      if (!this->ReadJSONFile(filename, RootType::Any, ReadReason::Root,
                               inProgressFiles, file, this->errors)) {
         return false;
       }
       haveOneFile = true;
+    }
+  } else {
+    filename = GetUserFilename(this->SourceDir);
+    if (cmSystemTools::FileExists(filename)) {
+      if (!this->ReadJSONFile(filename, RootType::User, ReadReason::Root,
+                              inProgressFiles, file, this->errors)) {
+        return false;
+      }
+      haveOneFile = true;
+    } else {
+      filename = GetFilename(this->SourceDir);
+      if (cmSystemTools::FileExists(filename)) {
+        if (!this->ReadJSONFile(filename, RootType::Project, ReadReason::Root,
+                                inProgressFiles, file, this->errors)) {
+          return false;
+        }
+        haveOneFile = true;
+      }
     }
   }
   assert(inProgressFiles.empty());

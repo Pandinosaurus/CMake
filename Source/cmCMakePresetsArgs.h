@@ -13,6 +13,7 @@ public:
   virtual void Clear() { this->PresetName.clear(); }
 
   std::string PresetName;
+  std::string PresetsFile;
 
 protected:
   cmCMakePresetsArgsBase() = default;

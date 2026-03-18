@@ -35,6 +35,13 @@ their own local build details.
 project is using Git, ``CMakePresets.json`` may be tracked, and
 ``CMakeUserPresets.json`` should be added to the ``.gitignore``.
 
+.. versionadded:: 4.4
+
+  CMake also supports specifying a file from which to read presets via the
+  :cmake-option:`--presets-file` option.  If this option is specified, neither
+  of ``CMakePresets.json`` nor ``CMakeUserPresets.json`` are required to be
+  present, and any presets defined in those files will be ignored/unavailable.
+
 Format
 ======
 

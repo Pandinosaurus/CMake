@@ -506,6 +506,12 @@ available.
   Command line flags can be mixed with presets. Command line flags have
   precedence over values found in a preset.
 
+.. note::
+  On CMake 4.4 and newer, CMake can also load presets from any file specified
+  with :option:`cmake --presets-file`. This can be useful when reusing settings
+  across multiple projects, since it avoids having to duplicate them in
+  separate ``CMakePresets.json`` files for each project.
+
 Presets also support limited macros, variables that can be brace-expanded
 inside the preset. The only one of interest to us is the ``${sourceDir}`` macro,
 which expands to the root directory of the project. We can use this to set our

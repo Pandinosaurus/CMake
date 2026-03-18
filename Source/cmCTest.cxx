@@ -1507,7 +1507,8 @@ bool cmCTest::SetArgsFromPreset(cmCMakePresetsArgs const& args)
   auto const workingDirectory = cmSystemTools::GetLogicalWorkingDirectory();
 
   cmCMakePresetsGraph settingsFile;
-  auto result = settingsFile.ReadProjectPresets(workingDirectory);
+  auto result =
+    settingsFile.ReadProjectPresets(workingDirectory, args.PresetsFile);
   if (result != true) {
     cmSystemTools::Error(cmStrCat("Could not read presets from ",
                                   workingDirectory, ":\n",
@@ -1997,6 +1998,13 @@ int cmCTest::Run(std::vector<std::string> const& args)
                      CommandArgument::Values::One,
                      [&presetsArgs](std::string const& presetArg) -> bool {
                        presetsArgs.PresetName = presetArg;
+                       return true;
+                     } },
+    CommandArgument{ "--presets-file", "'--presets-file' requires an argument",
+                     CommandArgument::Values::One,
+                     [&presetsArgs](std::string const& presetFileArg) -> bool {
+                       presetsArgs.PresetsFile =
+                         cmSystemTools::ToNormalizedPathOnDisk(presetFileArg);
                        return true;
                      } }
   };
@@ -2606,8 +2614,8 @@ int cmCTest::Run(std::vector<std::string> const& args)
     }
   }
 
-  // TestProgressOutput only supported if console supports it and not logging
-  // to a file
+  // TestProgressOutput only supported if console supports it and not
+  // logging to a file
   this->Impl->TestProgressOutput = this->Impl->TestProgressOutput &&
     !this->Impl->OutputLogFile && this->ProgressOutputSupportedByConsole();
 #ifdef _WIN32

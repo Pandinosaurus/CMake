@@ -76,6 +76,8 @@ cmDocumentationEntry const cmDocumentationUsageNote = {
 
 cmDocumentationEntry const cmDocumentationOptions[] = {
   { "--preset <preset>,--preset=<preset>", "Specify a configure preset." },
+  { "--presets-file <file>,--presets-file=<file>",
+    "Specify the path to a presets file." },
   { "--list-presets[=<type>]", "List available presets." },
   { "--workflow [<options>]", "Run a workflow preset." },
   { "-E", "CMake command mode. Run \"cmake -E\" for a summary of commands." },
@@ -516,6 +518,10 @@ int do_build(int ac, char const* const* av)
     buildArgs.verbose = true;
     return true;
   };
+  auto presetFileLambda = [&](std::string const& value) -> bool {
+    presetsArgs.PresetsFile = cmSystemTools::ToNormalizedPathOnDisk(value);
+    return true;
+  };
 
   using CommandArgument =
     cmCommandLineArgument<bool(std::string const& value)>;
@@ -524,6 +530,8 @@ int do_build(int ac, char const* const* av)
     CommandArgument{ "--preset", "No preset specified for --preset",
                      CommandArgument::Values::One,
                      CommandArgument::setToValue(presetsArgs.PresetName) },
+    CommandArgument{ "--presets-file", "No file specified for --presets-file",
+                     CommandArgument::Values::One, presetFileLambda },
     CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
                      CommandArgument::setToTrue(presetsArgs.ListPresets) },
     CommandArgument{ "-j", CommandArgument::Values::ZeroOrOne,
@@ -633,6 +641,8 @@ int do_build(int ac, char const* const* av)
       "  <dir>          = Project binary directory to be built.\n"
       "  --preset <preset>, --preset=<preset>\n"
       "                 = Specify a build preset.\n"
+      "  --presets-file <file>, --presets-file=<file>\n"
+      "                 = Specify the path to a presets file.\n"
       "  --list-presets[=<type>]\n"
       "                 = List available build presets.\n"
       "  --parallel [<jobs>], -j [<jobs>]\n"
@@ -989,6 +999,13 @@ int do_workflow(int ac, char const* const* av)
     CommandArgument{ "--preset", "No preset specified for --preset",
                      CommandArgument::Values::One,
                      CommandArgument::setToValue(presetsArgs.PresetName) },
+    CommandArgument{ "--presets-file", "No file specified for --presets-file",
+                     CommandArgument::Values::One,
+                     [&presetsArgs](std::string const& value) -> bool {
+                       presetsArgs.PresetsFile =
+                         cmSystemTools::ToNormalizedPathOnDisk(value);
+                       return true;
+                     } },
     CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
                      CommandArgument::setToTrue(presetsArgs.ListPresets) },
     CommandArgument{ "--fresh", CommandArgument::Values::Zero,
@@ -1031,10 +1048,11 @@ int do_workflow(int ac, char const* const* av)
     std::cerr <<
       "Usage: cmake --workflow <options>\n"
       "Options:\n"
-      "  --preset <preset> = Workflow preset to execute.\n"
-      "  --list-presets    = List available workflow presets.\n"
-      "  --fresh           = Configure a fresh build tree, removing any "
-                            "existing cache file.\n"
+      "  --preset <preset>     = Workflow preset to execute.\n"
+      "  --presets-file <file>  = Path to a presets file.\n"
+      "  --list-presets        = List available workflow presets.\n"
+      "  --fresh               = Configure a fresh build tree, removing any "
+                                "existing cache file.\n"
       ;
     /* clang-format on */
     return 1;

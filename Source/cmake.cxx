@@ -1434,6 +1434,13 @@ void cmake::SetArgs(std::vector<std::string> const& args)
                            return true;
                          });
   arguments.emplace_back(
+    "--presets-file", "No file specified for --presets-file",
+    CommandArgument::Values::One,
+    [&presetsArgs](std::string const& value, cmake*) -> bool {
+      presetsArgs.PresetsFile = cmSystemTools::ToNormalizedPathOnDisk(value);
+      return true;
+    });
+  arguments.emplace_back(
     "--list-presets", CommandArgument::Values::ZeroOrOne,
     [&](std::string const& value, cmake*) -> bool {
       if (value.empty() || value == "configure") {
@@ -2016,7 +2023,8 @@ bool cmake::SetArgsFromPreset(cmCMakePresetsConfigureArgs const& args,
   using ListPresets = cmCMakePresetsConfigureArgs::ListPresetsOption;
 
   cmCMakePresetsGraph presetsGraph;
-  auto result = presetsGraph.ReadProjectPresets(this->GetHomeDirectory());
+  auto result = presetsGraph.ReadProjectPresets(this->GetHomeDirectory(),
+                                                args.PresetsFile);
   if (result != true) {
     std::string errorMsg =
       cmStrCat("Could not read presets from ", this->GetHomeDirectory(), ":\n",
@@ -3929,7 +3937,8 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
         cmSystemTools::GetLogicalWorkingDirectory());
     }
     cmCMakePresetsGraph settingsFile;
-    auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory());
+    auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory(),
+                                                  presetsArgs.PresetsFile);
     if (result != true) {
       cmSystemTools::Error(
         cmStrCat("Could not read presets from ", this->GetHomeDirectory(),
@@ -4282,7 +4291,8 @@ int cmake::Workflow(cmCMakePresetsWorkflowArgs const& args)
   this->SetHomeOutputDirectory(cmSystemTools::GetLogicalWorkingDirectory());
 
   cmCMakePresetsGraph settingsFile;
-  auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory());
+  auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory(),
+                                                args.PresetsFile);
   if (result != true) {
     cmSystemTools::Error(cmStrCat("Could not read presets from ",
                                   this->GetHomeDirectory(), ":\n",
