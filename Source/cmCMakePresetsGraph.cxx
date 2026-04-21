@@ -1142,12 +1142,12 @@ std::string cmCMakePresetsGraph::GetUserFilename(std::string const& sourceDir)
 }
 
 bool cmCMakePresetsGraph::ReadProjectPresets(std::string const& sourceDir,
-                                             bool allowNoFiles)
+                                             ReadOption readFilesOption)
 {
   this->SourceDir = cmSystemTools::CollapseFullPath(sourceDir);
   this->ClearPresets();
 
-  if (!this->ReadProjectPresetsInternal(allowNoFiles)) {
+  if (!this->ReadProjectPresetsInternal(readFilesOption)) {
     this->ClearPresets();
     return false;
   }
@@ -1183,7 +1183,8 @@ std::string cmCMakePresetsGraph::GetGeneratorForPreset(
   return {};
 }
 
-bool cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
+bool cmCMakePresetsGraph::ReadProjectPresetsInternal(
+  ReadOption readFilesOption)
 {
   bool haveOneFile = false;
 
@@ -1209,7 +1210,7 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
   assert(inProgressFiles.empty());
 
   if (!haveOneFile) {
-    if (allowNoFiles) {
+    if (readFilesOption == ReadOption::AllowNoFiles) {
       return true;
     }
     cmCMakePresetsErrors::FILE_NOT_FOUND(filename, &this->parseState);
