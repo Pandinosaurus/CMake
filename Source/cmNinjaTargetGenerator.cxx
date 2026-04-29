@@ -1438,6 +1438,7 @@ void cmNinjaTargetGenerator::GenerateSwiftOutputFileMap(
   this->Configs[config].SwiftOutputMap[""] = deps;
 
   cmGeneratedFileStream output(mapFilePath);
+  output.SetCopyIfDifferent(true);
   output << this->Configs[config].SwiftOutputMap;
 
   // Add flag
