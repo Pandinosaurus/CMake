@@ -84,7 +84,6 @@ Properties on Directories
    /prop_dir/LINK_DIRECTORIES
    /prop_dir/LINK_OPTIONS
    /prop_dir/LISTFILE_STACK
-   /prop_dir/MACROS
    /prop_dir/PARENT_DIRECTORY
    /prop_dir/RULE_LAUNCH_COMPILE
    /prop_dir/RULE_LAUNCH_CUSTOM
@@ -702,6 +701,7 @@ Deprecated Properties on Directories
    /prop_dir/COMPILE_DEFINITIONS_CONFIG
    /prop_dir/INTERPROCEDURAL_OPTIMIZATION
    /prop_dir/INTERPROCEDURAL_OPTIMIZATION_CONFIG
+   /prop_dir/MACROS
    /prop_dir/TEST_INCLUDE_FILE
 
 
